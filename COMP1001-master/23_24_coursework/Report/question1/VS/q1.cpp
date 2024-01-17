@@ -15,6 +15,8 @@
 #include <immintrin.h>
 #include <omp.h>
 
+using namespace std;
+
 #define M 1024*512
 #define ARITHMETIC_OPERATIONS1 3*M
 #define TIMES1 1
@@ -33,6 +35,21 @@ void routine2_vec(float alpha, float beta);
 
 __declspec(align(64)) float  y[M], z[M];
 __declspec(align(64)) float A[N][N], x[N], w[N];
+
+
+
+
+bool compareArrays(const float* arr1, const float* arr2, int size, float epsilon = 1e-6) {
+    for (int i = 0; i < size; ++i) {
+        if (abs(arr1[i] - arr2[i]) > epsilon) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
 
 int main() {
 
@@ -79,6 +96,27 @@ int main() {
 
     run_time = omp_get_wtime() - start_time; //end timer
     printf("\n Time elapsed is %f secs \n %e FLOPs achieved\n", run_time, (double)(ARITHMETIC_OPERATIONS2) / ((double)run_time / TIMES2));
+
+
+    //Routine to check correctness of routine1_vec and routine2_vec
+
+    float* y_float = new float[M]; //Creates a new float equal to y_float with dynamic size of M 
+    float* w_float = new float[N]; //Creates a new float equal to w_float with dynamic size of N
+    copy(begin(y), end(y), y_float); //Copies the contents between begin(y) and end(y) into y_float
+    copy(begin(w), end(w), w_float); //Copies the contents between begin(w) and end(w) into w_float 
+
+
+    if (compareArrays(y, y_float, M) && compareArrays(w, w_float, N)) { //Compares the results and outputs a response
+        std::cout << "Results are correct.\n";
+    }
+    else {
+        std::cout << "Results are incorrect.\n";
+    }
+
+
+    delete[] y_float;   //Deletes y_float
+    delete[] w_float;   //Deletes w_float
+
 
     return 0;
 }
@@ -209,3 +247,5 @@ void routine2_vec(float alpha, float beta) {
         }
     }
 }
+
+
